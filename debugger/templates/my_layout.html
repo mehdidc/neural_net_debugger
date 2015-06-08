@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+<script type="text/javascript" src="static/my_update_function.js"></script>
+<script type="text/javascript">
+$(document).ready(
+    function(){
+    update_current_state_periodically("my_layout",
+                                      my_update_function, 3000);
+        return false;
+    }
+);
+</script>
+
+{% endblock %}
+
+{% block body %}
+
+<div id="content">
+</div>
+
+{% endblock %}
