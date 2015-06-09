@@ -5,55 +5,97 @@ $.makeTable = function (mydata) {
             }).join("\n") + "</tr>").append("<tr>"+$.map(Object.keys(mydata), function (k) {return "<td>"+mydata[k]+"</td>";}).join("\n")  + "</tr>");
 }
 
+charts = {};
 
-$(document).ready(function(){
-    chart = new CanvasJS.Chart("chartContainer", {
+function curve_new(id, title, xlabel, ylabel, data_names){
+    data = [];
+    for(i in data_names){
+        data.push(
+            {
+                    type: "line",
+                    dataPoints: [
+                    ],
+                    name: data_names[i],
+                    showInLegend: true,        
+
+            }
+        );
+    };
+    chart = new CanvasJS.Chart(id, {
               title: {
-                        text: "Adding & Updating dataPoints"
+                        text: title
                },
                axisX:{
-                    title: "epoch"
+                    title: xlabel
                 },
                 axisY:{
-                    title: "loss"
+                    title: ylabel
                 },
-                data: [
-                {
-                        type: "line",
-                        dataPoints: [
-                        ],
-                        name: "train",
-                        showInLegend: true,        
-
-                },
-                {
-                        type: "line",
-                        dataPoints: [
-                        ],
-                        name: "valid",
-                        showInLegend: true,        
-
-                }]
-
-
+                data: data
         });
-     chart.render(); 
-     });
+    chart.render();
+    return chart;
+}
+
+$(document).ready(function(){
+ });
 
 function default_update_function(state){
-    filters = state["filters"];
-    state["filters"] = undefined;
-    table = $.makeTable(state);
-    $('#content').html(table);
+    if(state["meta"] != 'undefined'){
+        meta = state["meta"];
+        if(typeof(meta) != 'undefined'){
+            if(typeof(meta["html"]) != 'undefined'){
+                $.each(meta["html"],
+                        function(v){
+                            if($("#" + meta["html"][v]).length != 0) {
+                                return;
+                            }
+                            $('#html').append("<h1>"+meta["html"][v]+
+                                              "</h1><div id='" + 
+                                              meta["html"][v] + 
+                                              "'></div>");
+                        }
+                );
+            }
+            if(typeof(meta["curves"]) != 'undefined'){
+                $.each(meta["curves"],
+                        function(k, v){
+                            if(charts.hasOwnProperty(k)){
+                                return;
+                            }
+                            charts[k] = curve_new("curves", v["title"], 
+                                                  v["xlabel"], v["ylabel"], 
+                                                  v["data_names"]);
+                        }
+                );
 
-    point = {y: parseFloat(state["loss_train"])};
-    chart.options.data[0].dataPoints.push(point);
-    if(typeof(state["loss_valid"]) != 'undefined'){
-        point = {y: parseFloat(state["loss_valid"])};
-        chart.options.data[1].dataPoints.push(point);
+            }
+        }
+
     }
-    if(typeof(filters) != 'undefined'){
-        $('#filters').html(filters);
+
+    curves = state["curves"];
+    html = state["html"];
+    table = state["tables"];        
+    if(typeof(curves) != 'undefined'){
+        for(k in curves){
+            i = 0;
+            for(p in curves[k]){
+                point = {}
+                point.x = (curves[k][p].x);
+                point.y = (curves[k][p].y);
+                charts[k].options.data[i].dataPoints.push(point);
+                i += 1;
+            }
+            charts[k].render();
+        }
     }
-    chart.render();
-}
+    
+    if(typeof(html) != 'undefined'){
+        for(h in html){
+            $('#'+h).html(html[h]);
+        }
+    }
+
+
+}   

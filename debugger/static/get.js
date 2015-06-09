@@ -2,6 +2,7 @@
 function update_current_state(jobname, update_function){
     $.ajax({
             type : 'POST',
+            dataType: 'json',
             url : SCRIPT_ROOT + '/get_current_state',
             data : {"jobname": jobname},
             success : function(state){
@@ -13,7 +14,8 @@ function update_current_state(jobname, update_function){
 function update_current_state_periodically(jobname, update_function, interval){
     function worker(){
         $.ajax({
-                type : 'GET',
+                type : 'POST',
+                dataType: 'json',
                 url : SCRIPT_ROOT + '/get_current_state',
                 data: {"jobname": jobname},
                 success : function(state){

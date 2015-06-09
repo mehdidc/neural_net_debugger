@@ -2,6 +2,7 @@
 import sqlite3
 from flask import (Flask, request, session, g, redirect, url_for,
                    abort, render_template, flash, jsonify)
+from flask.ext.compress import Compress
 
 import jinja2
 
@@ -17,7 +18,9 @@ USERNAME = 'admin'
 PASSWORD = 'default'
 
 # create our little application :)
+compress = Compress()
 app = Flask(__name__)
+compress.init_app(app)
 app.config.from_object(__name__)
 
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
@@ -39,17 +42,19 @@ current_states = defaultdict(lambda:deque())
 
 @app.route('/push_state', methods=('POST', ))
 def push_state():
-    current_states[request.form.get("jobname", "default")].append(request.form.copy())
+    data = request.get_json()
+    current_states[data.get("jobname", "default")].append(data.copy())
     return render_template('index.html')
 
 
-@app.route('/get_current_state', methods=('GET',))
+@app.route('/get_current_state', methods=('POST',))
 def get_current_state():
-    jobname = request.args.get("jobname", "default")
+    jobname = request.form.get("jobname", "default")
     if len(current_states[jobname]):
         state = current_states[jobname].popleft()
     else:
         abort(404)
+    state = state.copy()
     return jsonify(state)
 
 if __name__ == '__main__':
