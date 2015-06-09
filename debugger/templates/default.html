@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+<script type="text/javascript" src="static/default_update_function.js"></script>
+<script type="text/javascript">
+$(document).ready(
+    function(){
+    update_current_state_periodically("default",
+                                      default_update_function, 3000);
+        return false;
+    }
+);
+</script>
+
+{% endblock %}
+
+{% block body %}
+
+<div id="content">
+</div>
+
+<div id="filters" style="height:500px;">
+</div>
+
+
+<div id="chartContainer">
+</div>
+
+
+{% endblock %}
